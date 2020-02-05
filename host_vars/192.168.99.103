@@ -1,0 +1,72 @@
+default_dbpass: Developer2020_
+disable_EE_options: False
+oracle_sw_source_local: /home/frank/transfer/linux_193000
+
+db_homes_config:
+  19300-base:
+    home: 19300-base
+    version: 19.3.0.0
+    edition: EE
+
+db_homes_installed:
+     - home: 19300-base
+       apply_patches: False
+       state: present
+
+oracle_databases:
+       - home: 19300-base                                     # 'Last' directory in ORACLE_HOME path (e.g /u01/app/oracle/12.2.0.1/db1)
+         oracle_version_db: 19.3.0.0                          # Oracle versiono (12.2.0.1,12.1.0.2,12.1.0.1,11.2.0.4,11.2.0.3)
+         oracle_edition: EE                                   # The edition of database-server (EE,SE,SEONE)
+         oracle_db_name: B01                                  # Database name
+         oracle_db_passwd: Developer2020_                     # Passwords (sys/system/dbsnm etc)
+         oracle_db_type: SI                                   # Type of database (RAC,RACONENODE,SI)
+         is_container: TRUE				      # (true/false) Is the database a container database
+         storage_type: FS                                     # Database storage to be used. ASM or FS.
+         oracle_db_mem_totalmb: 1024                          # Amount of RAM to be used for SGA
+         oracle_database_type: MULTIPURPOSE                   # MULTIPURPOSE|DATA_WAREHOUSING|OLTP
+         listener_name: LISTENER                              # This home will have a listener configured
+         listener_port: 1521
+         redolog_groups: 4
+         redolog_size_in_mb: 100
+         redolog_size: 100M
+         datafile_dest: /u01/oradata
+         recoveryfile_dest: /u01/fra
+         state: present
+         init_parameters:
+              - {name: db_create_file_dest, value: '/u01/oradata', scope: both, state: present}
+              - {name: db_recovery_file_dest, value: '/u01/fra', scope: both, state: present}
+              - {name: db_recovery_file_dest_size, value: 10G, scope: both, state: present}
+
+oracle_pdbs:
+  - home: 19300-base
+    pdb_name: orclpdb1
+    datafile_dest: /u01/oradata/
+    cdb: B01
+    state: present
+    tablespaces:
+         - { name: users, size: 10M, bigfile: True, autoextend: false , next: 5M, maxsize: 500M, content: permanent, state: present }
+         - { name: appuser1_data, size: 10M, bigfile: True, autoextend: false , next: 5M, maxsize: 500M, content: permanent, state: present }
+    init_parameters:
+         - {name: db_create_file_dest, value: '/u01/oradata/', scope: both, state: present}
+    services:
+           - { name: app1_service,  state: started }
+    users:
+      - schema: appuser1
+        default_tablespace: appuser1_data
+        grants:
+           - approle1
+        state: present
+      - schema: appdba
+        default_tablespace: users
+        grants:
+           - dba
+        state: present
+    roles:
+      - name: approle1
+        grants:
+             - create session
+             - create table
+             - select any table
+             - select any dictionary
+        state: present
+
