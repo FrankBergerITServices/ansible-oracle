@@ -1,16 +1,32 @@
 default_dbpass: Developer2020_
 disable_EE_options: False
 oracle_sw_source_local: /home/frank/transfer/linux_193000
+apply_patches_db: True
+
+oracle_sw_patches: 
+      - { filename: p30557433_190000_Linux-x86-64.zip, patchid: 30557433, version: 19.3.0.0, patchversion: 19.6.0.0.200114, description: Database Release Update 19.6.0.0.200114 }
+      - { filename: p30484981_190000_Linux-x86-64.zip, patchid: 30484981, version: 19.3.0.0, patchversion: 19.6.0.0.200114, description: OJVM Release Update 19.6.0.0.200114 }
+
 
 db_homes_config:
   19300-base:
     home: 19300-base
     version: 19.3.0.0
     edition: EE
+    opatch_minversion: 12.2.0.1.17
+    opatchauto: []
+    opatch:
+        - patchid: 30557433
+          patchversion: 19.6.0.0.200114
+          state: present
+        - patchid: 30484981 
+          patchversion: 19.6.0.0.200114
+          state: present
+
 
 db_homes_installed:
      - home: 19300-base
-       apply_patches: False
+       apply_patches: True
        state: present
 
 oracle_databases:
@@ -20,22 +36,24 @@ oracle_databases:
          oracle_db_name: B01                                  # Database name
          oracle_db_passwd: Developer2020_                     # Passwords (sys/system/dbsnm etc)
          oracle_db_type: SI                                   # Type of database (RAC,RACONENODE,SI)
-         is_container: TRUE				      # (true/false) Is the database a container database
+         is_container: True				      # (true/false) Is the database a container database
          storage_type: FS                                     # Database storage to be used. ASM or FS.
-         oracle_db_mem_totalmb: 1024                          # Amount of RAM to be used for SGA
+         oracle_db_mem_totalmb: 1500                          # Amount of RAM to be used for SGA
          oracle_database_type: MULTIPURPOSE                   # MULTIPURPOSE|DATA_WAREHOUSING|OLTP
          listener_name: LISTENER                              # This home will have a listener configured
          listener_port: 1521
          redolog_groups: 4
-         redolog_size_in_mb: 100
          redolog_size: 100M
+         archivelog: True
+         flashback: False
+         force_logging: False
          datafile_dest: /u01/oradata
          recoveryfile_dest: /u01/fra
          state: present
          init_parameters:
               - {name: db_create_file_dest, value: '/u01/oradata', scope: both, state: present}
               - {name: db_recovery_file_dest, value: '/u01/fra', scope: both, state: present}
-              - {name: db_recovery_file_dest_size, value: 10G, scope: both, state: present}
+              - {name: db_recovery_file_dest_size, value: 15G, scope: both, state: present}
 
 oracle_pdbs:
   - home: 19300-base

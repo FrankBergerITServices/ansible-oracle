@@ -27,6 +27,21 @@
   tags:
   - oragridpatchpush
 
+- name: db-opatch | Copy oracle DB patch (opatch) to server (local)
+  copy:
+     src={{ oracle_sw_source_local }}/{{ item[0].filename }}
+     dest={{ oracle_stage }}
+     mode=775
+     owner={{ oracle_user }} 
+     group={{ oracle_group }}
+     force=no
+  with_nested:
+  - "{{oracle_sw_patches}}"
+  - "{{db_homes_config[dbh.home]['opatch']}}"
+  when: apply_patches_db and item[1].patchid == item[0].patchid and oracle_sw_copy and is_sw_source_local
+  tags:
+  - oradbpatchpush
+
 - name: gi-opatch | Copy oracle opatch to server (www)
   get_url:
       url={{ oracle_sw_source_www }}/{{ item.filename }}
