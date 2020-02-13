@@ -4,8 +4,11 @@ ansible_user = ansible
 become = sudo
 
 [all_servers:children]
-myhostgroup
+demo1
+demo2
 
-[myhostgroup]
-#192.168.1.15
+[demo1]
 192.168.99.103
+
+[demo2]
+192.168.99.104
